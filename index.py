@@ -18,15 +18,35 @@ domThought = ChatBot(
 )
 
 def train_bot(user_question, user_answer):
-    trainer = ListTrainer(domThought)
+    corpus_trainer = ChatterBotCorpusTrainer(domThought)
+    corpus_trainer.train(
+        'chatterbot.corpus.indonesia'
+    )
+    list_trainer = ListTrainer(domThought)
     conversation = [user_question, user_answer]
-    trainer.train(conversation)
-    print(f"Trained the bot with new data: {user_question} -> {user_answer}")
-
-trainer = ChatterBotCorpusTrainer(domThought)
-trainer.train(
-    'chatterbot.corpus.indonesia'
-)
-
-response = domThought.get_response(input("Enter text: "))
-print(response)
+    list_trainer.train(
+        conversation
+    )
+    return f"Saya telah berlatih: {user_question} -> {user_answer}"
+    
+def get_response(input_text):
+    
+    response = domThought.get_response(input_text)
+    if response.confidence > 0.7:
+        return response
+        
+    print("Bot: Saya tidak yakin bagaimana menjawabnya. Tolong bantu saya!")
+    user_answer = input('Apa yang seharusnya Bot katakan? ')
+    train_bot(input_text, user_answer)
+    return 'Terima kasih telah melatih saya kata-kata baru ini!'
+        
+    
+        
+while True:
+    user_input = input("Anda: ")
+    if user_input.lower() == 'exit':
+        break
+    
+    bot_response = get_response(user_input)
+    print(f"Bot: {bot_response}")
+    
